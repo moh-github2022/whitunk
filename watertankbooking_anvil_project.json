@@ -1,0 +1,25 @@
+{
+  "projectName": "WaterTankBooking",
+  "forms": [
+    {
+      "name": "Form1",
+      "layout": {
+        "type": "ColumnPanel",
+        "name": "column_panel_1",
+        "properties": {
+          "role": "card",
+          "visible": true
+        }
+      },
+      "code": "from ._anvil_designer import Form1Template\nfrom anvil import *\nimport anvil.server\n\nclass Form1(Form1Template):\n  def __init__(self, **properties):\n    self.init_components(**properties)\n\n  def _submit_order(self, quantity):\n    name = self.text_box_name.text\n    address = self.text_box_address.text\n    \n    if not name or not address:\n      self.label_status.text = \"Please enter your Name and Address.\"\n      self.label_status.visible = True\n      return\n\n    try:\n      result = anvil.server.call('place_booking', name, address, quantity)\n      self.label_status.text = result\n      self.label_status.visible = True\n      self.text_box_name.text = \"\"\n      self.text_box_address.text = \"\"\n    except Exception as e:\n      self.label_status.text = f\"Error: {str(e)}\"\n      self.label_status.visible = True\n\n  def button_1_tank_click(self, **event_args):\n    self._submit_order(\"1 Tank\")\n\n  def button_half_tank_click(self, **event_args):\n    self._submit_order(\"Half Tank\")\n\n  def button_quarter_tank_click(self, **event_args):\n    self._submit_order(\"Quarter Tank\")\n"
+    }
+  ],
+  "serverModules": [
+    {
+      "name": "BookingService",
+      "code": "import anvil.server\nfrom datetime import datetime\n\n@anvil.server.callable\ndef place_booking(name, address, quantity):\n    # In a real application, you would save this to a Data Table\n    # e.g. app_tables.bookings.add_row(name=name, address=address, quantity=quantity, date=datetime.now())\n    print(f\"New Order: {quantity} for {name} at {address}\")\n    return f\"Booking Confirmed: {quantity} white truck dispatched to {address}.\""
+    }
+  ],
+  "anvilYaml": "package_name: water_tank_booking\nstartup_form: Form1\ndb_schema:\n  bookings:\n    client: none\n    server: full\n    columns:\n      - name: name\n        type: string\n      - name: address\n        type: string\n      - name: quantity\n        type: string\n      - name: date\n        type: datetime\nruntime_options:\n  version: 2\n  client_version: 3\n  server_version: python3-full\n",
+  "version": "1.0.0"
+}
